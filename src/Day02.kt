@@ -4,7 +4,7 @@ fun main() {
             .filter { it.isNotBlank() }
             .associate { line ->
                 Regex("Game (\\d+): (.+)").find(line)!!.destructured.let { (gameId, sets) ->
-                    gameId.toInt() to sets.split(';').map { set ->
+                     val cubesCount = sets.split(';').map { set ->
                         set.split(',').associate { cubeData ->
                             Regex("(\\d+) (\\w+)").find(cubeData)!!.destructured.let { (count, color) ->
                                 color to count.toInt()
@@ -23,6 +23,7 @@ fun main() {
 
                         map
                     }
+                    gameId.toInt() to cubesCount
                 }
             }
     }
