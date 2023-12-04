@@ -1,27 +1,19 @@
+import kotlin.math.max
+
 fun main() {
     fun requiredCubeCount(input: List<String>): Map<Int, Map<String, Int>> {
         return input
             .filter { it.isNotBlank() }
             .associate { line ->
                 Regex("Game (\\d+): (.+)").find(line)!!.destructured.let { (gameId, sets) ->
-                     val cubesCount = sets.split(';').map { set ->
+                    val cubesCount = sets.split(';').map { set ->
                         set.split(',').associate { cubeData ->
                             Regex("(\\d+) (\\w+)").find(cubeData)!!.destructured.let { (count, color) ->
                                 color to count.toInt()
                             }
                         }
                     }.reduce { map1, map2 ->
-                        val map = mutableMapOf<String, Int>()
-
-                        map += map1.filterKeys { it !in map2 }
-                        map += map2.filterKeys { it !in map1 }
-
-                        map += map1.filterKeys { it in map2 }.mapValues { (color, count1) ->
-                            val count2 = map2[color]!!
-                            if (count1 >= count2) count1 else count2
-                        }
-
-                        map
+                        map1.merge(map2) { _, count1, count2 -> max(count1, count2) }
                     }
                     gameId.toInt() to cubesCount
                 }
