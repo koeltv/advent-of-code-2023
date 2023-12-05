@@ -32,17 +32,19 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        val cardsWithId = input.associate { line -> ScratchCard.parseFrom(line).let { it.id to it } }
+        val (matchingNumbersPerId, countPerId) = input
+            .map { ScratchCard.parseFrom(it) }
+            .run {
+                associate { it.id to it.countMatchingNumbers() } to associate { it.id to 1 }.toMutableMap()
+            }
 
         var scratchCardCount = 0
-        val cardsWithCount = cardsWithId.values.associateWith { 1 }.toMutableMap()
+        while (countPerId.values.any { it != 0 }) {
+            val (id, count) = countPerId.entries.first { it.value != 0 }
+            countPerId[id] = 0
 
-        while (cardsWithCount.any { it.value != 0 }) {
-            val (card, count) = cardsWithCount.entries.first { it.value != 0 }
-            cardsWithCount[card] = 0
-
-            for (i in 1..card.countMatchingNumbers()) {
-                cardsWithCount.merge(cardsWithId[card.id + i]!!, count) { old, new -> old + new }
+            for (i in 1..matchingNumbersPerId[id]!!) {
+                countPerId[id + i] = countPerId[id + i]!! + count
             }
 
             scratchCardCount += count
