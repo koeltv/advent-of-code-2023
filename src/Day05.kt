@@ -78,7 +78,7 @@ fun main() {
                     val seedRangeLength = length.toLong()
                     firstSeedNumber until firstSeedNumber + seedRangeLength
                 }
-            }.flatMapToLong { range -> range.asSequence().asStream().mapToLong { it } }
+            }.flatMapToLong { it.toStream() }
             .map { almanac.convert("seed", "location", it) }
             .min().asLong
 

@@ -1,7 +1,10 @@
 import java.math.BigInteger
 import java.security.MessageDigest
+import java.util.stream.IntStream
+import java.util.stream.LongStream
 import kotlin.io.path.Path
 import kotlin.io.path.readLines
+import kotlin.streams.asStream
 
 /**
  * Reads lines from the given input txt file.
@@ -35,4 +38,14 @@ fun <K, V> Map<K, V>.merge(map2: Map<K, V>, mergeFunction: (key: K, value1: V, v
             this.filterKeys { it in map2 }.mapValues { (key, value1) ->
                 mergeFunction(key, value1, map2[key]!!)
             }
+}
+
+fun LongRange.toStream(): LongStream {
+    return if (step == 1L) LongStream.rangeClosed(first, last)
+    else asSequence().asStream().mapToLong { it }
+}
+
+fun IntRange.toStream(): IntStream {
+    return if (step == 1) IntStream.rangeClosed(first, last)
+    else asSequence().asStream().mapToInt { it }
 }
