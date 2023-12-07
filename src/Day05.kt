@@ -25,34 +25,31 @@ data class Almanac(private val tables: List<LookupTable>) {
     private val cache = mutableMapOf<Pair<String, String>, List<LookupTable>>()
 
     fun convert(source: String, target: String, value: Long): Long {
-        val conversionChain = cache[source to target] ?: let {
-            val chain = mutableListOf<LookupTable>()
-            var currentSource = source
-            do {
-                val table = tables.first { it.source == currentSource }
-                chain.add(table)
-                currentSource = table.destination
-                cache[source to currentSource] = chain.toList()
-            } while (chain.last().destination != target)
-            chain
-        }
+        val conversionChain = cache[source to target] ?: buildConversionChain(source, target)
 
         return conversionChain.fold(value) { currentValue, lookupTable ->
             lookupTable.convert(currentValue)
         }
     }
 
+    private fun buildConversionChain(source: String, target: String): List<LookupTable> {
+        val chain = mutableListOf<LookupTable>()
+        var currentSource = source
+        do {
+            val table = tables.first { it.source == currentSource }
+            chain.add(table)
+            currentSource = table.destination
+            cache[source to currentSource] = chain.toList()
+        } while (chain.last().destination != target)
+        return chain
+    }
+
     companion object {
         fun parseFrom(input: List<String>): Almanac {
             return Almanac(
-                input.fold(mutableListOf<MutableList<String>>(mutableListOf())) { stringGroups, string ->
-                    stringGroups.apply {
-                        if (string.isBlank()) add(mutableListOf())
-                        else stringGroups.last().add(string)
-                    }
-                }.map {
-                    LookupTable.parseFrom(it)
-                }
+                input
+                    .splitOn { it.isBlank() }
+                    .map { LookupTable.parseFrom(it) }
             )
         }
     }

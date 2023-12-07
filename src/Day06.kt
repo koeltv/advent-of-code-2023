@@ -17,7 +17,7 @@ fun main() {
         val times = input[0].substringAfter(":").trim().split(Regex(" +")).map { it.toLong() }
         val distances = input[1].substringAfter(":").trim().split(Regex(" +")).map { it.toLong() }
 
-        val races = times.mapIndexed { i, time -> time to distances[i] }
+        val races = times.zip(distances)
 
         return countPossibilities(races).reduce { product, value -> product * value }
     }

@@ -40,6 +40,26 @@ fun <K, V> Map<K, V>.merge(map2: Map<K, V>, mergeFunction: (key: K, value1: V, v
             }
 }
 
+/**
+ * Splits a list of elements on the given predicate, elements matching the predicate are thrown away.
+ *
+ * ```
+ * val values = "1 2 3 4 5 6 7 8"
+ * val usingSplit = values.split(" ")
+ * val usingSplitOn = values.toList().splitOn { it == ' ' }.map { it.joinToString() }
+ * ```
+ *
+ * @param T the type of elements in the list
+ * @param predicate the predicate used to split the list
+ * @receiver the list to be split
+ * @return a list of lists, where each inner list represents a split sub-list
+ */
+fun <T> List<T>.splitOn(predicate: (T) -> Boolean): List<List<T>> =
+    fold(mutableListOf(mutableListOf<T>())) { acc, element ->
+        if (predicate(element)) acc.apply { add(mutableListOf()) }
+        else acc.apply { last().add(element) }
+    }
+
 fun LongRange.toStream(): LongStream {
     return if (step == 1L) LongStream.rangeClosed(first, last)
     else asSequence().asStream().mapToLong { it }
