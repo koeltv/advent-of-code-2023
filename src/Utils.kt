@@ -69,3 +69,25 @@ fun IntRange.toStream(): IntStream {
     return if (step == 1) IntStream.rangeClosed(first, last)
     else asSequence().asStream().mapToInt { it }
 }
+
+/**
+ * Calculates the least common multiple (LCM) of the integers in the list.
+ *
+ * @receiver the list of integers to calculate LCM for
+ * @return the LCM of the integers in the list
+ */
+fun List<Int>.lcm(): Long {
+    return fold(1L) { lcm, value ->
+        (lcm * value) / gcd(lcm, value.toLong())
+    }
+}
+
+
+/**
+ * Calculates the greatest common divisor (GCD) of two numbers.
+ *
+ * @param a the first number
+ * @param b the second number
+ * @return the GCD of the two numbers
+ */
+fun gcd(a: Long, b: Long): Long = if (b == 0L) a else gcd(b, a % b)
