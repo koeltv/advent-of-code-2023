@@ -4,7 +4,6 @@ import java.util.stream.IntStream
 import java.util.stream.LongStream
 import kotlin.io.path.Path
 import kotlin.io.path.readLines
-import kotlin.streams.asStream
 
 /**
  * Reads lines from the given input txt file.
@@ -62,12 +61,12 @@ fun <T> List<T>.splitOn(predicate: (T) -> Boolean): List<List<T>> =
 
 fun LongRange.toStream(): LongStream {
     return if (step == 1L) LongStream.rangeClosed(first, last)
-    else asSequence().asStream().mapToLong { it }
+    else LongStream.iterate(first, { it <= last }) { it + step }
 }
 
 fun IntRange.toStream(): IntStream {
     return if (step == 1) IntStream.rangeClosed(first, last)
-    else asSequence().asStream().mapToInt { it }
+    else IntStream.iterate(first, { it <= last }) { it + step }
 }
 
 /**
@@ -77,9 +76,7 @@ fun IntRange.toStream(): IntStream {
  * @return the LCM of the integers in the list
  */
 fun List<Int>.lcm(): Long {
-    return fold(1L) { lcm, value ->
-        (lcm * value) / gcd(lcm, value.toLong())
-    }
+    return fold(1L) { lcm, value -> (lcm * value) / gcd(lcm, value.toLong()) }
 }
 
 
