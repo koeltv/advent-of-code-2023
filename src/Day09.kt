@@ -1,11 +1,7 @@
 data class Variation(val values: List<Int>) {
-    val stages = run {
-        val stages = mutableListOf(values)
-        do {
-            stages += stages.last().windowed(2).map { (first, second) -> second - first }
-        } while (stages.last().any { it != 0 })
-        stages
-    }
+    val stages = generateSequence(values) { it.zipWithNext { a, b -> b - a } }
+        .takeWhile { stage -> stage.any { it != 0 } }
+        .toList()
 }
 
 fun main() {
