@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.util.stream.IntStream
@@ -9,6 +11,19 @@ import kotlin.io.path.readLines
  * Reads lines from the given input txt file.
  */
 fun readInput(name: String) = Path("src/$name.txt").readLines()
+
+/**
+ * Checks if the actual value is equal to the expected value. If they are not equal, an IllegalStateException is thrown with an optional error message.
+ *
+ * @param actual The actual value to compare.
+ * @param expected The expected value to compare against.
+ * @param message A lambda function that returns the error message to be displayed if the values are not equal. The lambda takes the actual value as a parameter and returns a string
+ *.
+ * @throws IllegalStateException if the actual value is not equal to the expected value.
+ */
+fun <T> checkEqual(actual: T, expected: T, message: (T) -> String = { value -> "Expected $expected, got $value" }) {
+    if (expected != actual) throw IllegalStateException(message(actual))
+}
 
 /**
  * Converts string to md5 hash.
