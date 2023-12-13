@@ -1,3 +1,7 @@
+operator fun Collection<CharSequence>.contains(point: Coordinates): Boolean {
+    return point.y in indices && point.x in first().indices
+}
+
 data class PipeMaze(val map: List<String>) {
     val loopTileWithDistance: Map<Coordinates, Int> = findLoopTiles()
 
@@ -116,8 +120,8 @@ data class PipeMaze(val map: List<String>) {
         map.indices.forEach { y ->
             map[y].indices.forEach { x ->
                 when (Coordinates(x, y)) {
-                    in enclosedTiles -> colorPrint('I', TerminalColor.GREEN)
-                    in loopTiles -> colorPrint(map[y][x], TerminalColor.RED)
+                    in enclosedTiles -> colorPrint('I', EscapeSequence.Color.GreenBold)
+                    in loopTiles -> colorPrint(map[y][x], EscapeSequence.Color.Red)
                     else -> print(' ')
                 }
             }
@@ -154,10 +158,6 @@ data class PipeMaze(val map: List<String>) {
                 map[y][x] == char
             }?.let { x -> Coordinates(x, y) }
         }
-    }
-
-    private operator fun Collection<CharSequence>.contains(point: Coordinates): Boolean {
-        return point.y in indices && point.x in first().indices
     }
 
     private operator fun List<String>.get(tile: Coordinates): Char = map[tile.y][tile.x]

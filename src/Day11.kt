@@ -37,7 +37,7 @@ data class Picture(val grid: List<String>, val expansionFactor: Long = 2) {
     fun show() {
         grid.forEachIndexed { y, line ->
             line.forEachIndexed { x, c ->
-                if (adaptToExpansion(x, y) in galaxies) colorPrint("#", TerminalColor.GREEN)
+                if (adaptToExpansion(x, y) in galaxies) colorPrint("#", EscapeSequence.Color.Green)
                 else if (x in emptyColumnsIndexes && y in emptyRowsIndexes) print("┼")
                 else if (x in emptyColumnsIndexes) print("│")
                 else if (y in emptyRowsIndexes) print("─")
