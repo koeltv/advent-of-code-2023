@@ -1,13 +1,3 @@
-data class Coordinates(val x: Int, val y: Int) {
-    fun near(coordinates: Coordinates): Boolean {
-        return (-1..1).any { dx ->
-            (-1..1).any { dy ->
-                x == coordinates.x + dx && y == coordinates.y + dy
-            }
-        }
-    }
-}
-
 abstract class DataPoint(open val coordinates: Coordinates) {
     abstract fun near(coordinates: Coordinates): Boolean
 }

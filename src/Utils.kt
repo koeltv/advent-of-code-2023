@@ -103,3 +103,27 @@ fun List<Int>.lcm(): Long {
  * @return the GCD of the two numbers
  */
 fun gcd(a: Long, b: Long): Long = if (b == 0L) a else gcd(b, a % b)
+
+data class Coordinates(val x: Int, val y: Int) {
+    fun near(coordinates: Coordinates): Boolean {
+        return (-1..1).any { dx ->
+            (-1..1).any { dy ->
+                x == coordinates.x + dx && y == coordinates.y + dy
+            }
+        }
+    }
+
+    fun north(): Coordinates = Coordinates(x, y - 1)
+    fun south(): Coordinates = Coordinates(x, y + 1)
+    fun west(): Coordinates = Coordinates(x - 1, y)
+    fun east(): Coordinates = Coordinates(x + 1, y)
+    fun neighbors(): List<Coordinates> = listOf(north(), south(), west(), east())
+    fun up(): Coordinates = north()
+    fun down(): Coordinates = south()
+    fun left(): Coordinates = west()
+    fun right(): Coordinates = east()
+}
+
+operator fun Collection<CharSequence>.contains(point: Coordinates): Boolean {
+    return point.y in indices && point.x in first().indices
+}

@@ -1,11 +1,6 @@
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.min
 
-fun Coordinates.up(): Coordinates = north()
-fun Coordinates.down(): Coordinates = south()
-fun Coordinates.left(): Coordinates = west()
-fun Coordinates.right(): Coordinates = east()
-
 /**
  * Find mirrors and report counts of rows and columns before them.
  * We need to report lists here because we may have more than 1 mirror in the rows/columns,

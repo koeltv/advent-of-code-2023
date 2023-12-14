@@ -1,7 +1,3 @@
-operator fun Collection<CharSequence>.contains(point: Coordinates): Boolean {
-    return point.y in indices && point.x in first().indices
-}
-
 data class PipeMaze(val map: List<String>) {
     val loopTileWithDistance: Map<Coordinates, Int> = findLoopTiles()
 
@@ -176,12 +172,6 @@ data class PipeMaze(val map: List<String>) {
         }
     }
 }
-
-fun Coordinates.north(): Coordinates = Coordinates(x, y - 1)
-fun Coordinates.south(): Coordinates = Coordinates(x, y + 1)
-fun Coordinates.west(): Coordinates = Coordinates(x - 1, y)
-fun Coordinates.east(): Coordinates = Coordinates(x + 1, y)
-fun Coordinates.neighbors(): List<Coordinates> = listOf(north(), south(), west(), east())
 
 fun main() {
     fun part1(input: List<String>): Int {
