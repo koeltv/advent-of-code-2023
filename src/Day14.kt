@@ -1,70 +1,27 @@
-// TODO Compact all 4 move methods into 1
+enum class Direction { NORTH, SOUTH, WEST, EAST }
 
-fun List<List<Char>>.moveAllNorth(): List<List<Char>> {
+fun List<List<Char>>.moveAllToward(direction: Direction): List<List<Char>> {
     val mutableMap = map { it.toMutableList() }.toMutableList()
 
-    for (y in mutableMap.indices) {
-        for (x in mutableMap[y].indices) {
-            if (y == 0 || mutableMap[y][x] != 'O') continue
+    for (y in if (direction == Direction.SOUTH) indices.reversed() else indices) {
+        for (x in if (direction == Direction.EAST) mutableMap[y].indices.reversed() else mutableMap[y].indices) {
+            if (mutableMap[y][x] != 'O') continue
 
-            var dy = y - 1
-            while (dy >= 0 && mutableMap[dy][x] == '.') {
-                mutableMap[dy + 1][x] = '.'
-                mutableMap[dy--][x] = 'O'
+            val increment = when (direction) {
+                Direction.NORTH -> Coordinates(0, -1)
+                Direction.SOUTH -> Coordinates(0, 1)
+                Direction.WEST -> Coordinates(-1, 0)
+                Direction.EAST -> Coordinates(1, 0)
             }
-        }
-    }
 
-    return mutableMap
-}
+            var current = Coordinates(x, y)
+            var next = current + increment
 
-fun List<List<Char>>.moveAllSouth(): List<List<Char>> {
-    val mutableMap = map { it.toMutableList() }.toMutableList()
-
-    for (y in mutableMap.indices.reversed()) {
-        for (x in mutableMap[y].indices) {
-            if (y == mutableMap.lastIndex || mutableMap[y][x] != 'O') continue
-
-            var dy = y + 1
-            while (dy <= mutableMap.lastIndex && mutableMap[dy][x] == '.') {
-                mutableMap[dy - 1][x] = '.'
-                mutableMap[dy++][x] = 'O'
-            }
-        }
-    }
-
-    return mutableMap
-}
-
-fun List<List<Char>>.moveAllWest(): List<List<Char>> {
-    val mutableMap = map { it.toMutableList() }.toMutableList()
-
-    for (x in mutableMap[0].indices) {
-        for (y in mutableMap.indices) {
-            if (x == 0 || mutableMap[y][x] != 'O') continue
-
-            var dx = x - 1
-            while (dx >= 0 && mutableMap[y][dx] == '.') {
-                mutableMap[y][dx + 1] = '.'
-                mutableMap[y][dx--] = 'O'
-            }
-        }
-    }
-
-    return mutableMap
-}
-
-fun List<List<Char>>.moveAllEast(): List<List<Char>> {
-    val mutableMap = map { it.toMutableList() }.toMutableList()
-
-    for (x in mutableMap[0].indices.reversed()) {
-        for (y in mutableMap.indices) {
-            if (x == mutableMap[0].lastIndex || mutableMap[y][x] != 'O') continue
-
-            var dx = x + 1
-            while (dx <= mutableMap[0].lastIndex && mutableMap[y][dx] == '.') {
-                mutableMap[y][dx - 1] = '.'
-                mutableMap[y][dx++] = 'O'
+            while (next in mutableMap && mutableMap[next] == '.') {
+                mutableMap[current] = '.'
+                mutableMap[next] = 'O'
+                current += increment
+                next += increment
             }
         }
     }
@@ -112,7 +69,7 @@ fun main() {
     fun part1(input: List<String>): Int {
         val newMap = input
             .map { it.toList() }
-            .moveAllNorth()
+            .moveAllToward(Direction.NORTH)
 
         return newMap.calculateNorthSupportLoad()
     }
@@ -123,10 +80,10 @@ fun main() {
 
         do {
             map = map
-                .moveAllNorth()
-                .moveAllWest()
-                .moveAllSouth()
-                .moveAllEast()
+                .moveAllToward(Direction.NORTH)
+                .moveAllToward(Direction.WEST)
+                .moveAllToward(Direction.SOUTH)
+                .moveAllToward(Direction.EAST)
             northSupportLoads.add(map.calculateNorthSupportLoad())
         } while (findCycle(northSupportLoads) == null)
 

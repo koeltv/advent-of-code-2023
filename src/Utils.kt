@@ -122,8 +122,49 @@ data class Coordinates(val x: Int, val y: Int) {
     fun down(): Coordinates = south()
     fun left(): Coordinates = west()
     fun right(): Coordinates = east()
+
+    operator fun plus(coordinates: Coordinates): Coordinates {
+        return Coordinates(x + coordinates.x, y + coordinates.y)
+    }
+
+    operator fun minus(coordinates: Coordinates): Coordinates {
+        return Coordinates(x - coordinates.x, y - coordinates.y)
+    }
 }
 
+/**
+ * Checks whether the specified [point] belongs to the list of [CharSequence].
+ *
+ * A point belongs to the list of [CharSequence] if its coordinates are between (0, 0) and (this.lastIndex, this\[point.y].lastIndex).
+ */
 operator fun Collection<CharSequence>.contains(point: Coordinates): Boolean {
     return point.y in indices && point.x in first().indices
+}
+
+/**
+ * Checks whether the specified [point] belongs to the 2D list.
+ *
+ * A point belongs to the 2D list if its coordinates are between (0, 0) and (this.lastIndex, this\[point.y].lastIndex).
+ */
+operator fun <T> List<List<T>>.contains(point: Coordinates): Boolean {
+    return point.y in indices && point.x in this[point.y].indices
+}
+
+/**
+ * Returns the element at the specified index in the list.
+ * It is assumed that the first list contains lines and the second contains columns.
+ */
+operator fun <E> List<List<E>>.get(coordinates: Coordinates): E {
+    return this[coordinates.y][coordinates.x]
+}
+
+/**
+ * Replaces the element at the specified position in this 2D list with the specified element.
+ * It is assumed that the first list contains lines and the second contains columns.
+ * @return the element previously at the specified position
+ */
+operator fun <E> MutableList<MutableList<E>>.set(coordinates: Coordinates, value: E): E {
+    val previousValue = this[coordinates]
+    this[coordinates.y][coordinates.x] = value
+    return previousValue
 }
