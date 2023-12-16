@@ -1,5 +1,3 @@
-enum class Direction { NORTH, SOUTH, WEST, EAST }
-
 fun List<List<Char>>.moveAllToward(direction: Direction): List<List<Char>> {
     val mutableMap = map { it.toMutableList() }.toMutableList()
 

@@ -122,6 +122,12 @@ data class Coordinates(val x: Int, val y: Int) {
     fun down(): Coordinates = south()
     fun left(): Coordinates = west()
     fun right(): Coordinates = east()
+    fun moveToward(direction: Direction): Coordinates = when (direction) {
+        Direction.NORTH -> north()
+        Direction.SOUTH -> south()
+        Direction.WEST -> west()
+        Direction.EAST -> east()
+    }
 
     operator fun plus(coordinates: Coordinates): Coordinates {
         return Coordinates(x + coordinates.x, y + coordinates.y)
@@ -158,6 +164,10 @@ operator fun <E> List<List<E>>.get(coordinates: Coordinates): E {
     return this[coordinates.y][coordinates.x]
 }
 
+operator fun List<CharSequence>.get(coordinates: Coordinates): Char {
+    return this[coordinates.y][coordinates.x]
+}
+
 /**
  * Replaces the element at the specified position in this 2D list with the specified element.
  * It is assumed that the first list contains lines and the second contains columns.
@@ -167,4 +177,20 @@ operator fun <E> MutableList<MutableList<E>>.set(coordinates: Coordinates, value
     val previousValue = this[coordinates]
     this[coordinates.y][coordinates.x] = value
     return previousValue
+}
+
+enum class Direction {
+    NORTH,
+    SOUTH,
+    WEST,
+    EAST;
+
+    fun opposite(): Direction {
+        return when (this) {
+            NORTH -> SOUTH
+            SOUTH -> NORTH
+            WEST -> EAST
+            EAST -> WEST
+        }
+    }
 }

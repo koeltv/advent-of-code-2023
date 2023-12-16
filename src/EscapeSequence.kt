@@ -19,6 +19,11 @@ open class EscapeSequence private constructor(private val code: String) {
          * Clear current line
          */
         val ClearLine: EscapeSequence = EscapeSequence("\r\u001b[K")
+
+        /**
+         * Clear the whole terminal
+         */
+        val ClearTerminal: EscapeSequence = EscapeSequence("\u001b[H\u001b[2J")
     }
 
     class Color private constructor(code: String) : EscapeSequence(code) {
@@ -104,6 +109,14 @@ fun colorPrint(message: Any?, color: EscapeSequence.Color = EscapeSequence.Color
     print("${color}${message}${EscapeSequence.Reset}")
 }
 
+fun String.withColor(color: EscapeSequence.Color = EscapeSequence.Color.Black): String {
+    return "${color}${this}${EscapeSequence.Reset}"
+}
+
+fun Char.withColor(color: EscapeSequence.Color = EscapeSequence.Color.Black): String {
+    return "${color}${this}${EscapeSequence.Reset}"
+}
+
 fun colorPrintln(message: Any?, color: EscapeSequence.Color = EscapeSequence.Color.Black) {
     println("${color}${message}${EscapeSequence.Reset}")
 }
@@ -111,6 +124,8 @@ fun colorPrintln(message: Any?, color: EscapeSequence.Color = EscapeSequence.Col
 fun boldPrint(message: Any?) = colorPrint(message, EscapeSequence.Color.WhiteBoldBright)
 
 fun clearLine() = print(EscapeSequence.ClearLine)
+
+fun clearTerminal() = print(EscapeSequence.ClearTerminal)
 
 fun progressBar(x: Int, outOf: Int, color: EscapeSequence.Color = EscapeSequence.Color.Green) {
     clearLine()
