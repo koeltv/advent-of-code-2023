@@ -38,6 +38,8 @@ open class EscapeSequence private constructor(private val code: String) {
             val Cyan: Color = Color("\u001b[0;36m")
             val White: Color = Color("\u001b[0;37m")
 
+            val ColorPalette = listOf(Red, Green, Yellow, Blue, Magenta, Cyan)
+
             // Bold
             val BlackBold: Color = Color("\u001b[1;30m")
             val RedBold: Color = Color("\u001b[1;31m")

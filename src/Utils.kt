@@ -193,4 +193,6 @@ enum class Direction {
             EAST -> WEST
         }
     }
+
+    fun isHorizontal(): Boolean = this == WEST || this == EAST
 }

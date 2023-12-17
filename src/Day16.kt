@@ -1,5 +1,5 @@
 data class Beam(val coordinates: Coordinates, val direction: Direction) {
-    private fun moveKnowingTile(tile: Char): List<Beam> {
+    fun moveKnowingTile(tile: Char): List<Beam> {
         return if (tile == '.') {
             listOf(copy(coordinates = coordinates.moveToward(direction)))
         } else if (tile == '/' || tile == '\\') {
@@ -32,15 +32,56 @@ data class Beam(val coordinates: Coordinates, val direction: Direction) {
             error("Unknown encounter: $tile")
         }
     }
+}
 
-    fun propagateIn(map: List<String>, draw: List<String>.(List<Beam>) -> Unit = {}): List<Beam> {
-        val existingBeams = mutableListOf(this)
-        val onGoingBeams = mutableListOf(this)
+data class BeamMap(val map: List<String>, val startingBeam: Beam) {
+    private val beamsWithDirections = mutableMapOf<Coordinates, Pair<Boolean, Boolean>>()
 
+    private fun draw() {
+        val lines = map.indices.joinToString("\n", postfix = "\n") { y ->
+            map[y].mapIndexed { x, char ->
+                beamsWithDirections[Coordinates(x, y)]?.let { (isAnyVertical, isAnyHorizontal) ->
+                    if (char == '.') {
+                        val beamChar =
+                            if (isAnyVertical && isAnyHorizontal) '┼'
+                            else if (isAnyVertical) '│'
+                            else '─'
+                        beamChar.withColor(EscapeSequence.Color.YellowBright)
+                    } else {
+                        char.withColor(EscapeSequence.Color.Red)
+                    }
+                } ?: if (char == '.') " " else "$char"
+            }.joinToString("")
+        }
+        clearTerminal()
+        println(lines)
+    }
+
+    fun showPropagatedBeam() {
+        if (beamsWithDirections.isNotEmpty()) {
+            draw()
+        } else {
+            colorPrintln("Beam was not propagated yet !", EscapeSequence.Color.RedBold)
+        }
+    }
+
+    fun propagate(draw: Boolean = false): List<Coordinates> {
+        if (beamsWithDirections.isNotEmpty()) {
+            if (draw) draw()
+            return beamsWithDirections.keys.toList()
+        }
+
+        val existingBeams = mutableListOf(startingBeam)
+        val onGoingBeams = mutableListOf(startingBeam)
+
+        var bufferIndex = onGoingBeams.size
         while (onGoingBeams.isNotEmpty()) {
             val beam = onGoingBeams.removeFirst()
 
-            map.draw(existingBeams)
+            beamsWithDirections.compute(beam.coordinates) { _, previous ->
+                val isVertical = beam.direction == Direction.NORTH || beam.direction == Direction.SOUTH
+                (isVertical || previous?.first == true) to (!isVertical || previous?.second == true)
+            }
 
             val newBeams = beam.moveKnowingTile(map[beam.coordinates])
             newBeams
@@ -49,78 +90,53 @@ data class Beam(val coordinates: Coordinates, val direction: Direction) {
                     existingBeams.add(it)
                     onGoingBeams.add(it)
                 }
+
+            if (draw && --bufferIndex <= 0) {
+                draw()
+                bufferIndex = onGoingBeams.size
+            }
         }
 
-        return existingBeams
+        return existingBeams.map { it.coordinates }.distinct()
     }
-}
-
-private fun List<String>.drawWithBeams(existingBeams: List<Beam>) {
-    val beamDirections = existingBeams
-        .groupBy({ it.coordinates }) { it.direction }
-        .mapValues { (_, directions) ->
-            directions.any { it == Direction.NORTH || it == Direction.SOUTH } to
-                    directions.any { it == Direction.WEST || it == Direction.EAST }
-        }
-
-    val lines = indices.joinToString("\n", postfix = "\n") { y ->
-        this[y].mapIndexed { x, char ->
-            beamDirections[Coordinates(x, y)]?.let { (isAnyVertical, isAnyHorizontal) ->
-                if (char == '.') {
-                    val beamChar =
-                        if (isAnyVertical && isAnyHorizontal) '┼'
-                        else if (isAnyVertical) '│'
-                        else '─'
-                    beamChar.withColor(EscapeSequence.Color.YellowBright)
-                } else {
-                    char.withColor(EscapeSequence.Color.Red)
-                }
-            } ?: if (char == '.') " " else "$char"
-        }.joinToString("")
-    }
-    clearTerminal()
-    println(lines)
-    Thread.sleep(10)
 }
 
 fun main() {
     fun part1(input: List<String>, withProgress: Boolean = false): Int {
         val startingBeam = Beam(Coordinates(0, 0), Direction.EAST)
+        val map = BeamMap(input, startingBeam)
 
-        return startingBeam.propagateIn(input) { if (withProgress) drawWithBeams(it) }
-            .also { input.drawWithBeams(it) }
-            .distinctBy { it.coordinates }
-            .count()
+        return map.propagate(withProgress).also { map.showPropagatedBeam() }.count()
     }
 
     fun part2(input: List<String>, withProgress: Boolean = false): Int {
-        val startingHorizontally = input.indices.flatMap {
-            listOf(
-                Beam(Coordinates(0, it), Direction.EAST),
-                Beam(Coordinates(input[0].lastIndex, it), Direction.WEST),
-            )
-        }
-        val startingVertically = input[0].indices.flatMap {
+        val startingBeams = input.indices
+            .flatMap {
+                listOf(
+                    Beam(Coordinates(0, it), Direction.EAST),
+                    Beam(Coordinates(input[0].lastIndex, it), Direction.WEST),
+                )
+            } + input[0].indices.flatMap {
             listOf(
                 Beam(Coordinates(it, 0), Direction.SOUTH),
                 Beam(Coordinates(it, input.lastIndex), Direction.NORTH)
             )
         }
-
-        val startingBeams = startingHorizontally + startingVertically
-
         return startingBeams
-            .map { it.propagateIn(input) { beams -> if (withProgress) input.drawWithBeams(beams) } }
-            .maxBy { it.distinctBy { beam -> beam.coordinates }.count() }
-            .also { input.drawWithBeams(it) }
-            .distinctBy { it.coordinates }
-            .count()
+            .map { BeamMap(input, it) }
+            .maxBy { it.propagate(withProgress).count() }
+            .also { it.showPropagatedBeam() }
+            .propagate().count()
     }
 
 // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day16_test")
     checkEqual(part1(testInput, withProgress = true), 46)
     checkEqual(part2(testInput, withProgress = true), 51)
+
+// partial real input for visualisation purposes
+    val visualInput = readInput("Day16_visual")
+    boldPrint("\nVisualization: ${part1(visualInput, withProgress = true)}\n")
 
 // apply on real input
     val input = readInput("Day16")
